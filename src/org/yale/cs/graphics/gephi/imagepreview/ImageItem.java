@@ -28,7 +28,6 @@ package org.yale.cs.graphics.gephi.imagepreview;
 
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Image;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
