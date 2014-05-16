@@ -137,7 +137,7 @@ public class ImageItem extends AbstractItem{
      */
     public String renderSVG(File location_name)
     {
-        return (String)this.getSource() ;
+        return "file://" + new File(location_name, (String) this.getSource()).getAbsolutePath();
     }
     
      /**

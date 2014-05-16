@@ -79,24 +79,34 @@ public class ImageNodes implements Renderer{
     public void render(Item item, RenderTarget target, PreviewProperties properties) {
         if(!(item instanceof ImageItem)) return;
         
+        String imagesPath = properties.getValue(IMAGE_DIRECTORY);
+        if(imagesPath == null || imagesPath.isEmpty()){
+            return;
+        }
+        
+        File imagesDir = new File(imagesPath);
+        if(!imagesDir.exists() || !imagesDir.isDirectory()){
+            return;
+        }
+        
         if (showNodes(properties)) {
             if (target instanceof ProcessingTarget) {
-                renderImageProcessing((ImageItem)item, (ProcessingTarget) target, properties);
+                renderImageProcessing((ImageItem)item, (ProcessingTarget) target, properties, imagesDir);
             } else if (target instanceof SVGTarget) {
-                renderImageSVG((ImageItem)item, (SVGTarget) target, properties);
+                renderImageSVG((ImageItem)item, (SVGTarget) target, properties, imagesDir);
             } else if (target instanceof PDFTarget) {
-                renderImagePDF((ImageItem)item, (PDFTarget) target, properties);
+                renderImagePDF((ImageItem)item, (PDFTarget) target, properties, imagesDir);
             }
         }
         
     }
 
-    public void renderImageProcessing(ImageItem item, ProcessingTarget target, PreviewProperties properties) {
+    public void renderImageProcessing(ImageItem item, ProcessingTarget target, PreviewProperties properties, File directory) {
         //Graphics
         PGraphics graphics = target.getGraphics();
         graphics.pushStyle();
                     
-        PImage image = item.renderProcessing( (File)properties.getValue(IMAGE_DIRECTORY), target);
+        PImage image = item.renderProcessing(directory, target);
         
         if(image == null)
         {
@@ -126,9 +136,9 @@ public class ImageNodes implements Renderer{
         graphics.popStyle();
     }
 
-    public void renderImagePDF(ImageItem item, PDFTarget target, PreviewProperties properties) {
+    public void renderImagePDF(ImageItem item, PDFTarget target, PreviewProperties properties, File directory) {
                       
-        Image image = item.renderPDF((File)properties.getValue(IMAGE_DIRECTORY));
+        Image image = item.renderPDF(directory);
         
         if(image == null)
         {
@@ -167,7 +177,7 @@ public class ImageNodes implements Renderer{
         }
     }
 
-    public void renderImageSVG(ImageItem item, SVGTarget target, PreviewProperties properties) 
+    public void renderImageSVG(ImageItem item, SVGTarget target, PreviewProperties properties, File directory) 
     {
         
         //Params
@@ -182,7 +192,7 @@ public class ImageNodes implements Renderer{
 
         Element nodeElem = target.createElement("image");
         nodeElem.setAttribute("class", "node" );
-        nodeElem.setAttribute("xlink:href",(String)item.renderSVG((File)properties.getValue(IMAGE_DIRECTORY)));
+        nodeElem.setAttribute("xlink:href",(String)item.renderSVG(directory));
         nodeElem.setAttribute("x", ""+(x-size/2));
         nodeElem.setAttribute("y", ""+(y-size/2));
         
@@ -208,10 +218,10 @@ public class ImageNodes implements Renderer{
                 NbBundle.getMessage(ImageNodes.class, IMAGE_DESCRIPTION+".name"),
                 NbBundle.getMessage(ImageNodes.class, IMAGE_DESCRIPTION+".description"),
                 PreviewProperty.CATEGORY_NODES,"ImageNodes.property.enable").setValue("image"),*/
-            PreviewProperty.createProperty(this, IMAGE_DIRECTORY, File.class,
+            PreviewProperty.createProperty(this, IMAGE_DIRECTORY, String.class,
                 NbBundle.getMessage(ImageNodes.class, IMAGE_DIRECTORY+".name"),
                 NbBundle.getMessage(ImageNodes.class, IMAGE_DIRECTORY+".description"),
-                CATEGORY_NODE_IMAGE,"ImageNodes.property.enable").setValue(new File(".")),
+                CATEGORY_NODE_IMAGE,"ImageNodes.property.enable").setValue(new File(".").getAbsolutePath()),
             PreviewProperty.createProperty(this, IMAGE_OPACITY, Float.class,
                 NbBundle.getMessage(NodeRenderer.class, "NodeRenderer.property.opacity.displayName"),
                 NbBundle.getMessage(NodeRenderer.class, "NodeRenderer.property.opacity.description"),
